@@ -28,7 +28,7 @@
             background-color: #757575;
             outline: none;
         }
-        .key:active {
+        .key:active:hover {
             background-color: #1a1a1a;
         }
         .key:nth-child(4n) {
@@ -39,29 +39,32 @@
 <body>
     <main>
         <div id="keypad">
-            <button class="key">1</button>
-            <button class="key">2</button>
-            <button class="key">3</button>
-            <button class="key">A</button>
+            <button class="key" data-key="1">1</button>
+            <button class="key" data-key="2">2</button>
+            <button class="key" data-key="3">3</button>
+            <button class="key" data-key="a">A</button>
 
-            <button class="key">4</button>
-            <button class="key">5</button>
-            <button class="key">6</button>
-            <button class="key">B</button>
+            <button class="key" data-key="4">4</button>
+            <button class="key" data-key="5">5</button>
+            <button class="key" data-key="6">6</button>
+            <button class="key" data-key="b">B</button>
 
-            <button class="key">7</button>
-            <button class="key">8</button>
-            <button class="key">9</button>
-            <button class="key">C</button>
+            <button class="key" data-key="7">7</button>
+            <button class="key" data-key="8">8</button>
+            <button class="key" data-key="9">9</button>
+            <button class="key" data-key="c">C</button>
 
-            <button class="key">*</button>
-            <button class="key">0</button>
-            <button class="key">#</button>
-            <button class="key">D</button>
+            <button class="key" data-key="*">*</button>
+            <button class="key" data-key="0">0</button>
+            <button class="key" data-key="#">#</button>
+            <button class="key" data-key="d">D</button>
         </div>
     </main>
     <script>
         "use strict";
+        const Freqs = {row: [1209, 1336, 1477, 1633], col: [697, 770, 852, 941]};
+        const Keymap = "123a456b789c*0#d";
+
         let audioCtx;
         let oscA, oscB, gain;
 
@@ -78,19 +81,27 @@
 
         const keyDown = async ev => {
             if (!audioCtx) init();
-            console.debug("keydown", ev.target.innerText, ev);
+            const key = ev.target.getAttribute("data-key").toLowerCase();
+            console.debug("keydown", key, ev);
+
+            const index = Keymap.indexOf(key);
+            if (index < 0) return;
+
+            console.debug(index%4, index/4<<0);
+            oscA.frequency.value = Freqs.row[index%4];
+            oscB.frequency.value = Freqs.col[index/4<<0];
 
             await audioCtx.resume();
         }
         const keyUp = async ev => {
-            console.debug("keyup", ev.target.innerText, ev);
+            console.debug("keyup", ev.target.getAttribute("data-key"), ev);
 
-            await audioCtx.suspend();
+            if (audioCtx && audioCtx.state === "running") await audioCtx.suspend();
         }
         document.querySelectorAll(".key").forEach(e => {
             e.addEventListener("mousedown", keyDown);
             e.addEventListener("keydown", ev => ev.key === "Enter" && !ev.repeat && keyDown(ev));
-            e.addEventListener("mouseup", keyUp);
+            ["mouseup", "mouseleave"].forEach(ename=>e.addEventListener(ename, keyUp));
             e.addEventListener("keyup", ev => ev.key === "Enter" && !ev.repeat && keyUp(ev));
         })
     </script>
