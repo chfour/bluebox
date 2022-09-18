@@ -62,12 +62,30 @@
     </main>
     <script>
         "use strict";
+        let audioCtx;
+        let oscA, oscB, gain;
 
-        const keyDown = ev => {
-            console.debug("keydown", ev.target.innerText, ev);
+        const init = () => {
+            audioCtx = new AudioContext();
+            oscA = new OscillatorNode(audioCtx, {type: "sine"});
+            oscB = new OscillatorNode(audioCtx, {type: "sine"});
+            gain = new GainNode(audioCtx, {gain: 0.5});
+            oscA.connect(gain); oscB.connect(gain);
+            gain.connect(audioCtx.destination);
+            oscA.start(0); oscB.start(0);
+            console.debug("audioctx initialized", audioCtx);
         }
-        const keyUp = ev => {
+
+        const keyDown = async ev => {
+            if (!audioCtx) init();
+            console.debug("keydown", ev.target.innerText, ev);
+
+            await audioCtx.resume();
+        }
+        const keyUp = async ev => {
             console.debug("keyup", ev.target.innerText, ev);
+
+            await audioCtx.suspend();
         }
         document.querySelectorAll(".key").forEach(e => {
             e.addEventListener("mousedown", keyDown);
