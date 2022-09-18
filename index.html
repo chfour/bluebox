@@ -96,12 +96,12 @@
         const keyUp = async ev => {
             console.debug("keyup", ev.target.getAttribute("data-key"), ev);
 
-            if (audioCtx && audioCtx.state === "running") await audioCtx.suspend();
+            if (audioCtx) await audioCtx.suspend();
         }
         document.querySelectorAll(".key").forEach(e => {
-            e.addEventListener("mousedown", keyDown);
+            ["mousedown", "touchstart"].forEach(ename=>e.addEventListener(ename, keyDown));
             e.addEventListener("keydown", ev => ev.key === "Enter" && !ev.repeat && keyDown(ev));
-            ["mouseup", "mouseleave"].forEach(ename=>e.addEventListener(ename, keyUp));
+            ["mouseup", "mouseleave", "touchend"].forEach(ename=>e.addEventListener(ename, keyUp));
             e.addEventListener("keyup", ev => ev.key === "Enter" && !ev.repeat && keyUp(ev));
         })
     </script>
