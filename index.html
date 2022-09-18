@@ -60,5 +60,21 @@
             <button class="key">D</button>
         </div>
     </main>
+    <script>
+        "use strict";
+
+        const keyDown = ev => {
+            console.debug("keydown", ev.target.innerText, ev);
+        }
+        const keyUp = ev => {
+            console.debug("keyup", ev.target.innerText, ev);
+        }
+        document.querySelectorAll(".key").forEach(e => {
+            e.addEventListener("mousedown", keyDown);
+            e.addEventListener("keydown", ev => ev.key === "Enter" && !ev.repeat && keyDown(ev));
+            e.addEventListener("mouseup", keyUp);
+            e.addEventListener("keyup", ev => ev.key === "Enter" && !ev.repeat && keyUp(ev));
+        })
+    </script>
 </body>
 </html>
